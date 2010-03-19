@@ -1,5 +1,7 @@
 # Neo4j-Rails
 
+**TODO: Change the reference to rails in the Gemfile to use!** 
+
 This is an experimental library for playing with an
 ActiveModel-charged version of the Neo4j Ruby library. The intent is
 to use it as a full replacement for ActiveRecord inside a Rails 3
