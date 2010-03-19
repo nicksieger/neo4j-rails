@@ -7,10 +7,12 @@ describe Neo4j::Model do
   end
 end
 
-describe Neo4j::Model, :type => :neotx do
+describe Neo4j::Model, "lint" do
+  use_transactions
+
   before :each do
     @model = Neo4j::Model.new
   end
 
-  include ActiveModel::Lint::Tests
+  include_tests ActiveModel::Lint::Tests
 end
