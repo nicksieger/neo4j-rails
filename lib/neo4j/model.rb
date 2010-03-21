@@ -27,7 +27,7 @@ class Neo4j::Model
 
   # Handle Model.find(params[:id])
   def self.find(*args)
-    if args.length == 1 && args.to_i != 0
+    if args.length == 1 && String === args[0] && args[0].to_i != 0
       load(*args)
     else
       super
