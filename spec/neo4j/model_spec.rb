@@ -2,6 +2,8 @@ require File.expand_path('../../spec_helper', __FILE__)
 require 'neo4j/model'
 
 class IceCream < Neo4j::Model
+  property :flavour
+  index :flavour
   validates_presence_of :flavour
 end
 
@@ -42,13 +44,11 @@ describe Neo4j::Model, "save" do
   use_transactions
   before :each do
     @model = IceCream.new
-    @model[:flavour] = "vanilla"
+    @model.flavour = "vanilla"
   end
 
   it "should store the model in the database" do
-    with_transaction do
-      @model.save
-    end
+    @model.save
     @model.should be_persisted
     IceCream.load(@model.id).should == @model
   end
@@ -59,6 +59,26 @@ describe Neo4j::Model, "save" do
     @model.should_not be_valid
     @model.should_not be_persisted
     @model.id.should be_nil
+  end
+end
+
+describe Neo4j::Model, "find" do
+  before :each do
+    with_transaction do
+      @model = IceCream.new
+      @model.flavour = "vanilla"
+      @model.save
+    end
+  end
+  use_transactions
+
+  it "should load all nodes of that type from the database" do
+    IceCream.all.should include(@model)
+  end
+
+  it "should find a model by one of its attributes" do
+    pending "problem with lucene indexing"
+    IceCream.find(:flavour => "vanilla").to_a.should include(@model)
   end
 end
 

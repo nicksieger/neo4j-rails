@@ -1,4 +1,5 @@
 require 'neo4j'
+require 'neo4j/extensions/reindexer'
 require 'active_model'
 require 'neo4j/delayed_create'
 
@@ -25,28 +26,14 @@ class Neo4j::Model
     end
   end
 
+  def self.all
+    super.nodes
+  end
+
   # Handle Model.find(params[:id])
   def self.find(*args)
     if args.length == 1 && String === args[0] && args[0].to_i != 0
       load(*args)
-    else
-      super
-    end
-  end
-
-  def self.all
-    find(:_classname => self.name)
-  end
-
-  # Handle attribute getters and setters with method missing
-  # TODO: this is a little naive at the moment
-  def method_missing(meth, *args, &block)
-    if block.nil?
-      if args.length == 0
-        self[meth]
-      elsif args.length == 1 && meth.name[-1] == '='
-        self[meth.chop] = args.first
-      end
     else
       super
     end
