@@ -24,4 +24,31 @@ class Neo4j::Model
       result
     end
   end
+
+  # Handle Model.find(params[:id])
+  def self.find(*args)
+    if args.length == 1 && args.to_i != 0
+      load(*args)
+    else
+      super
+    end
+  end
+
+  def self.all
+    find(:_classname => self.name)
+  end
+
+  # Handle attribute getters and setters with method missing
+  # TODO: this is a little naive at the moment
+  def method_missing(meth, *args, &block)
+    if block.nil?
+      if args.length == 0
+        self[meth]
+      elsif args.length == 1 && meth.name[-1] == '='
+        self[meth.chop] = args.first
+      end
+    else
+      super
+    end
+  end
 end
