@@ -4,9 +4,9 @@ class Neo4j::TransactionManagement
   end
 
   def call(env)
-    Transaction.new
+    Neo4j::Transaction.new
     @app.call(env)
   ensure
-    Transaction.finish if Transaction.running?
+    Neo4j::Transaction.finish if Neo4j::Transaction.running?
   end
 end
