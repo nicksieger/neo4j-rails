@@ -14,17 +14,17 @@ ActiveRecord.
 Include the 'neo4j-rails' library in your Gemfile to use in your
 project.
 
-  gem "neo4j-rails", :git => "git://github.com/nicksieger/neo4j-rails.git"
+    gem "neo4j-rails", :git => "git://github.com/nicksieger/neo4j-rails.git"
 
 Extend Neo4j::Model to create your model node classes.
 
-class IceCream < Neo4j::Model
-  property :flavour
-  validates_presence_of :flavour
-end
+    class IceCream < Neo4j::Model
+      property :flavour
+      validates_presence_of :flavour
+    end
 
-IceCream.new.valid?  # => false
-IceCream.new(:flavour => "vanilla").valid?  # => true
+    IceCream.new.valid?  # => false
+    IceCream.new(:flavour => "vanilla").valid?  # => true
 
 # TODO
 
