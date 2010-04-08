@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'date'
 
 require './lib/neo4j-rails/version'
 gemspec = Gem::Specification.new do |s|
@@ -12,8 +13,8 @@ gemspec = Gem::Specification.new do |s|
   s.files = FileList["./**/*"].exclude("*.gem")
   s.homepage = %q{http://jruby.org}
   s.has_rdoc = false
-  s.add_dependency('rails', ">= 3.0.0.beta1")
-  s.add_dependency('neo4j')
+  s.add_dependency('rails', ">= 3.0.0.beta2")
+  s.add_dependency('neo4j', ">= 0.4.1")
 end
 
 task :gemspec do
