@@ -34,3 +34,14 @@ this point. Still missing to complete the ActiveRecord API:
 * Neo4j::Model#update_attributes
 * Neo4j::Model#destroy
 * Finder methods for searching for nodes
+
+# License
+
+Neo4j-Rails is available under the terms of the MIT license (see
+LICENSE.txt for details).
+
+However, Neo4j-Rails also depends on the [Neo4j.rb library][neo4j], and the MIT
+license does not replace or cover the licensing terms of its own
+library or its components.
+
+[neo4j]: http://github.com/andreasronge/neo4j
