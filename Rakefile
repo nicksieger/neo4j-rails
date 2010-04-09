@@ -23,6 +23,10 @@ task :gemspec do
   File.open("neo4j-rails.gemspec", "w") {|f| f << gemspec.to_ruby }
 end
 
+require 'rake/gempackagetask'
+Rake::GemPackageTask.new(gemspec) do |pkg|
+end
+
 require 'spec/rake/spectask'
 Spec::Rake::SpecTask.new
 
