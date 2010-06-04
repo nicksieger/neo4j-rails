@@ -98,3 +98,21 @@ describe Neo4j::Model, "destroy" do
     txn { Neo4j::Model.load(@model.id).should be_nil }
   end
 end
+
+describe Neo4j::Model, "create" do
+  use_transactions
+
+  it "should save the model and return it" do
+    model = Neo4j::Model.create
+    model.should be_persisted
+  end
+
+  it "should accept attributes to be set" do
+    model = Neo4j::Model.create :name => "Nick"
+    model[:name].should == "Nick"
+  end
+
+  it "bang version should raise an exception if save returns false" do
+    lambda { IceCreate.create! }.should raise_error
+  end
+end

@@ -9,12 +9,30 @@ class Neo4j::Model
   include ActiveModel::Conversion
   include ActiveModel::Validations
 
+  class RecordInvalidError < RuntimeError
+    attr_reader :record
+    def initialize(record)
+      @record = record
+      super(@record.errors.full_messages.join(", "))
+    end
+  end
+
   def persisted?
     @persisted
   end
 
   def read_attribute_for_validation(key)
     self[key]
+  end
+
+  def destroy
+    del
+  end
+
+  def save!
+    unless save
+      raise RecordInvalidError.new(self)
+    end
   end
 
   def self.load(*ids)
@@ -39,7 +57,11 @@ class Neo4j::Model
     end
   end
 
-  def destroy
-    del
+  def self.create(*args)
+    new(*args).tap {|model| model.save }
+  end
+
+  def self.create!(*args)
+    new(*args).tap {|model| model.save! }
   end
 end
