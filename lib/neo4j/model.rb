@@ -38,4 +38,8 @@ class Neo4j::Model
       super
     end
   end
+
+  def destroy
+    del
+  end
 end

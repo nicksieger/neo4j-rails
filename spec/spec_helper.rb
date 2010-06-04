@@ -20,10 +20,11 @@ class Test::Unit::TestCase
 
     after :each do
       Neo4j::Transaction.failure
+      Neo4j::Transaction.finish
     end
   end
 
-  def with_transaction(&block)
+  def txn(&block)
     Neo4j::Transaction.run(&block)
   end
 
@@ -33,6 +34,28 @@ class Test::Unit::TestCase
     include mod
     mod.instance_methods(false).each do |m|
       example(m, {}) {__send__ m}
+    end
+  end
+
+  after :each do
+    txn { fixtures.each { |obj| obj.del rescue nil } }
+  end
+
+  def fixtures
+    @fixtures ||= []
+  end
+
+  def fixture(obj)
+    self.fixtures << obj
+    obj
+  end
+
+  def self.insert_dummy_model
+    before :each do
+      txn do
+        @model = fixture(Neo4j::Model.new)
+        @model.save
+      end
     end
   end
 end

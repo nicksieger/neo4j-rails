@@ -27,8 +27,8 @@ end
 
 describe Neo4j::Model, "load" do
   before :each do
-    with_transaction do
-      @model = Neo4j::Model.new
+    txn do
+      @model = fixture(Neo4j::Model.new)
       @model.save
     end
   end
@@ -64,8 +64,8 @@ end
 
 describe Neo4j::Model, "find" do
   before :each do
-    with_transaction do
-      @model = IceCream.new
+    txn do
+      @model = fixture(IceCream.new)
       @model.flavour = "vanilla"
       @model.save
     end
@@ -88,4 +88,13 @@ describe Neo4j::Model, "lint" do
   end
 
   include_tests ActiveModel::Lint::Tests
+end
+
+describe Neo4j::Model, "destroy" do
+  insert_dummy_model
+
+  it "should remove the model from the database" do
+    txn { @model.destroy }
+    txn { Neo4j::Model.load(@model.id).should be_nil }
+  end
 end
