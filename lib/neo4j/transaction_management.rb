@@ -6,7 +6,10 @@ class Neo4j::TransactionManagement
   def call(env)
     Neo4j::Transaction.new
     @app.call(env)
+  rescue
+    Neo4j::Transaction.failure
+    raise
   ensure
-    Neo4j::Transaction.finish if Neo4j::Transaction.running?
+    Neo4j::Transaction.finish
   end
 end
