@@ -8,6 +8,8 @@ class Neo4j::Model
   include Neo4j::DelayedCreate
   include ActiveModel::Conversion
   include ActiveModel::Validations
+  extend ActiveModel::Callbacks
+  define_model_callbacks :create, :save, :update, :destroy
 
   class RecordInvalidError < RuntimeError
     attr_reader :record
@@ -26,7 +28,9 @@ class Neo4j::Model
   end
 
   def destroy
-    del
+    _run_destroy_callbacks do
+      del
+    end
   end
 
   def save!

@@ -58,4 +58,18 @@ class Test::Unit::TestCase
       end
     end
   end
+
+  module TempModel
+    @@_counter = 1
+    def self.set(klass)
+      name = "Model_#{@@_counter}"
+      @@_counter += 1
+      const_set(name,klass)
+      klass
+    end
+  end
+
+  def model_subclass(&block)
+    TempModel.set(Class.new(Neo4j::Model, &block))
+  end
 end

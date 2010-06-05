@@ -43,7 +43,7 @@ end
 describe Neo4j::Model, "save" do
   use_transactions
   before :each do
-    @model = IceCream.new
+    @model = fixture(IceCream.new)
     @model.flavour = "vanilla"
   end
 
@@ -77,7 +77,6 @@ describe Neo4j::Model, "find" do
   end
 
   it "should find a model by one of its attributes" do
-    pending "problem with lucene indexing"
     IceCream.find(:flavour => "vanilla").to_a.should include(@model)
   end
 end
@@ -113,6 +112,25 @@ describe Neo4j::Model, "create" do
   end
 
   it "bang version should raise an exception if save returns false" do
-    lambda { IceCreate.create! }.should raise_error
+    lambda { IceCream.create! }.should raise_error(Neo4j::Model::RecordInvalidError)
+  end
+
+  it "should run before and after create callbacks" do
+    klass = model_subclass do
+      property :created, :type => DateTime
+      before_create :timestamp
+      def timestamp
+        self.created = DateTime.now
+      end
+      after_create :mark_saved
+      attr_reader :saved
+      def mark_saved
+        @saved = true
+      end
+    end
+    klass.marshal?(:created).should be_true
+    model = klass.create!
+    model.created.should_not be_nil
+    model.saved.should_not be_nil
   end
 end

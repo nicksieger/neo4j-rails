@@ -8,8 +8,9 @@ module Neo4j::DelayedCreate
   # Override NodeMixin#init_without_node to save the properties for
   # when #save is called.
   def init_without_node(props) # :nodoc:
-    props[:_classname] = self.class.to_s
-    @_new_props = props
+    raise "Can't use Neo4j::Model with anonymous classes" if self.class.name == ""
+    props[:_classname] = self.class.name
+    @_new_props = props || {}
     @persisted = false
   end
 
@@ -39,14 +40,24 @@ module Neo4j::DelayedCreate
 
   def save
     if valid?
-      if @persisted
-        update
-      else
-        @_java_node = Neo4j.create_node @_new_props
-        @_java_node._wrapper = self
-        Neo4j.event_handler.node_created(self)
-        @_new_props = nil
-        @persisted = true
+      _run_save_callbacks do
+        if @persisted
+          _run_update_callbacks do
+            update
+          end
+        else
+          _run_create_callbacks do
+            @_java_node = Neo4j.create_node
+            @_java_node._wrapper = self
+            if @_new_props && !@_new_props.empty?
+              @_new_props.each {|k,v| @_java_node[k] = v }
+              update_index
+            end
+            Neo4j.event_handler.node_created(self)
+            @_new_props = nil
+            @persisted = true
+          end
+        end
       end
     end
   end
