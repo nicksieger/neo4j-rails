@@ -39,7 +39,7 @@ module Neo4j::DelayedSave
     @_unsaved_props.clear
     self
   end
-  alias_method :reset :reload
+  alias_method :reset, :reload
 
   def save
     if valid?
