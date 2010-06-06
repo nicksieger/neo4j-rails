@@ -1,6 +1,6 @@
-# Extension to Neo4j::NodeMixin to delay creation until #save is
-# called.
-module Neo4j::DelayedCreate
+# Extension to Neo4j::NodeMixin to delay creating/updating properties
+# until #save is called.
+module Neo4j::DelayedSave
   def id
     persisted? ? neo_id : nil
   end
@@ -10,7 +10,7 @@ module Neo4j::DelayedCreate
   def init_without_node(props) # :nodoc:
     raise "Can't use Neo4j::Model with anonymous classes" if self.class.name == ""
     props[:_classname] = self.class.name
-    @_new_props = props || {}
+    @_unsaved_props = props || {}
     @persisted = false
   end
 
@@ -18,52 +18,50 @@ module Neo4j::DelayedCreate
   def init_with_node(node)
     super
     @persisted = true
+    @_unsaved_props = {}
   end
 
-  # Delegate property access to temporary properties if they exist
+  # Delegate property access to temporary properties first
   def [](key)
-    if @_new_props
-      @_new_props[key]
-    else
-      super
+    if @_unsaved_props.has_key?(key)
+      @_unsaved_props[key]
+    elsif @_java_node
+      @_java_node[key]
     end
   end
 
-  # Delegate property write to temporary properties if they exist
+  # Delegate property write to temporary properties
   def []=(key, value)
-    if @_new_props
-      @_new_props[key] = value
-    else
-      super
-    end
+    @_unsaved_props[key] = value
   end
+
+  def reload(*)
+    @_unsaved_props.clear
+    self
+  end
+  alias_method :reset :reload
 
   def save
     if valid?
       _run_save_callbacks do
         if @persisted
           _run_update_callbacks do
-            # save has already happened, just let callbacks do their thing
+            @_unsaved_props.each {|k,v| @_java_node[k] = v }
+            @_unsaved_props.clear
           end
         else
           _run_create_callbacks do
             @_java_node = Neo4j.create_node
             @_java_node._wrapper = self
-            if @_new_props && !@_new_props.empty?
-              @_new_props.each {|k,v| @_java_node[k] = v }
-              update_index
-            end
+            @_unsaved_props.each {|k,v| @_java_node[k] = v }
+            @_unsaved_props.clear
+            update_index
             Neo4j.event_handler.node_created(self)
-            @_new_props = nil
             @persisted = true
           end
         end
       end
       true
-    else
-      # Mark tx as failure so we don't save changes to properties
-      Neo4j::Transaction.failure if @persisted
-      nil
     end
   end
 end

@@ -151,6 +151,6 @@ describe Neo4j::Model, "update_attributes" do
     model = nil
     txn { model = fixture(klass.create!(:name => "vanilla")) }
     txn { model.update_attributes(:name => nil).should be_false }
-    txn { model.name.should == "vanilla" }
+    txn { model.reload.name.should == "vanilla" }
   end
 end

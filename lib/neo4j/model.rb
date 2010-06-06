@@ -1,11 +1,11 @@
 require 'neo4j'
 require 'neo4j/extensions/reindexer'
 require 'active_model'
-require 'neo4j/delayed_create'
+require 'neo4j/delayed_save'
 
 class Neo4j::Model
   include Neo4j::NodeMixin
-  include Neo4j::DelayedCreate
+  include Neo4j::DelayedSave
   include ActiveModel::Conversion
   include ActiveModel::Validations
   extend ActiveModel::Callbacks
@@ -27,14 +27,23 @@ class Neo4j::Model
     self[key]
   end
 
+  def attributes=(attrs)
+    attrs.each do |k,v|
+      if respond_to?("#{k}=")
+        send("#{k}=", v)
+      else
+        self[k] = v
+      end
+    end
+  end
 
   def update_attributes(attributes)
-    update(attributes)
+    self.attributes = attributes
     save
   end
 
   def update_attributes!(attributes)
-    update(attributes)
+    self.attributes = attributes
     save!
   end
 
