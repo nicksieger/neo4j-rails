@@ -26,6 +26,7 @@ end
 require 'rake/gempackagetask'
 Rake::GemPackageTask.new(gemspec) do |pkg|
 end
+task :package => :spec
 
 task :release => :package do
   if Neo4jRails::VERSION != ENV['VERSION']
