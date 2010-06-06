@@ -27,6 +27,17 @@ class Neo4j::Model
     self[key]
   end
 
+
+  def update_attributes(attributes)
+    update(attributes)
+    save
+  end
+
+  def update_attributes!(attributes)
+    update(attributes)
+    save!
+  end
+
   def destroy
     _run_destroy_callbacks do
       del
@@ -67,5 +78,14 @@ class Neo4j::Model
 
   def self.create!(*args)
     new(*args).tap {|model| model.save! }
+  end
+
+  def self.inherited(subc) # :nodoc:
+    # Make subclasses of Neo4j::Model each have their own root class/indexer
+    subc.instance_eval do
+      def root_class
+        self
+      end
+    end
   end
 end

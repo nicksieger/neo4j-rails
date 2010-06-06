@@ -134,3 +134,23 @@ describe Neo4j::Model, "create" do
     model.saved.should_not be_nil
   end
 end
+
+describe Neo4j::Model, "update_attributes" do
+  insert_dummy_model
+
+  it "should save the attributes" do
+    txn { @model.update_attributes(:a => 1, :b => 2).should be_true }
+    txn { @model[:a].should == 1; @model[:b].should == 2 }
+  end
+
+  it "should not update the model if it is invalid" do
+    klass = model_subclass do
+      property :name
+      validates_presence_of :name
+    end
+    model = nil
+    txn { model = fixture(klass.create!(:name => "vanilla")) }
+    txn { model.update_attributes(:name => nil).should be_false }
+    txn { model.name.should == "vanilla" }
+  end
+end

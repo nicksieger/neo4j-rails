@@ -43,7 +43,7 @@ module Neo4j::DelayedCreate
       _run_save_callbacks do
         if @persisted
           _run_update_callbacks do
-            update
+            # save has already happened, just let callbacks do their thing
           end
         else
           _run_create_callbacks do
@@ -59,6 +59,11 @@ module Neo4j::DelayedCreate
           end
         end
       end
+      true
+    else
+      # Mark tx as failure so we don't save changes to properties
+      Neo4j::Transaction.failure if @persisted
+      nil
     end
   end
 end
