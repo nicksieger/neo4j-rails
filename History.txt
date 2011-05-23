@@ -1,3 +1,0 @@
-=== 0.5.0  (2010-06-06)
-
-- First release to Rubygems.org.
